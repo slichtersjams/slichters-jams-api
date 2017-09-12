@@ -6,7 +6,7 @@ import (
 	"net/http/httptest"
 )
 
-func TestHandler(t *testing.T) {
+func TestHandler__returns_correct_responses(t *testing.T) {
 	req, err := http.NewRequest("GET", "/", nil)
 	if err != nil {
 		t.Fatal(err)
@@ -24,13 +24,23 @@ func TestHandler(t *testing.T) {
 	expected := "Jam!"
 
 	if actual := rr.Body.String(); actual != expected {
-		t.Errorf("Expected %v, got %v", expected, actual)
+		expected := "Not a Jam!"
+		if actual := rr.Body.String(); actual != expected {
+			t.Errorf("Expected %v, got %v", expected, actual)
+		}
 	}
 }
 
 func TestGetResponse__returns_jam_for_zero(t *testing.T) {
 	expected := "Jam!"
 	if resp := getResponse(0); resp != expected {
+		t.Errorf("Expected %v, got %v", expected, resp)
+	}
+}
+
+func TestGetResponse__returns_not_a_jam_for_1(t *testing.T) {
+	expected := "Not a Jam!"
+	if resp := getResponse(1); resp != expected {
 		t.Errorf("Expected %v, got %v", expected, resp)
 	}
 }
