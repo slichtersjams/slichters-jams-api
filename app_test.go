@@ -27,3 +27,10 @@ func TestHandler(t *testing.T) {
 		t.Errorf("Expected %v, got %v", expected, actual)
 	}
 }
+
+func TestGetResponse__returns_jam_for_zero(t *testing.T) {
+	expected := "Jam!"
+	if resp := getResponse(0); resp != expected {
+		t.Errorf("Expected %v, got %v", expected, resp)
+	}
+}
