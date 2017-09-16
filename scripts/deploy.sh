@@ -1,2 +1,2 @@
 gcloud config set project slichters-jams
-glcoud app deploy app.yaml
+gcloud app deploy app.yaml
