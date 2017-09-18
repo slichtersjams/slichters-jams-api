@@ -1,0 +1,36 @@
+# Use Dockerized infrastructure
+sudo: false
+
+language: go
+
+go:
+  - 1.8
+
+# Cache our Gcloud SDK between commands
+cache:
+  directories:
+  - "$HOME/google-cloud-sdk/"
+
+env:
+  # Make sure gcloud command is on the path and prevent cloud sdk from prompting user
+  - PATH=$PATH:${HOME}/google-cloud-sdk/bin CLOUDSDK_CORE_DISABLE_PROMPTS=1
+
+before_install:
+  # Decrypt our google cloud creds
+  - openssl aes-256-cbc -K $encrypted_800fa0eb32e2_key -iv $encrypted_800fa0eb32e2_iv
+    -in client-secret.json.enc -out client-secret.json -d
+
+  # Download and install the sdk
+  - rm -rf ${HOME}/google-cloud-sdk
+  - curl https://sdk.cloud.google.com | bash >/dev/null;
+
+
+  # Authenticate gcloud auth tool
+  - gcloud auth activate-service-account --key-file client-secret.json
+
+deploy:
+  skip_cleanup: true
+  provider: script
+  script: sh scripts/deploy.sh $TRAVIS_BRANCH
+  on:
+    all_branches: true
