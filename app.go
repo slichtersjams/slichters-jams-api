@@ -13,6 +13,7 @@ func init() {
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
+    w.Header().Add("Access-Control-Allow-Origin", "*")
     fmt.Fprint(w, getResponse(rand.Intn(2)))
 }
 

@@ -29,6 +29,11 @@ func TestHandler__returns_correct_responses(t *testing.T) {
 			t.Errorf("Expected %v, got %v", expected, actual)
 		}
 	}
+
+	expected_header := "*"
+	if actual_header := rr.Header().Get("Access-Control-Allow-Origin"); actual_header != expected_header {
+		t.Errorf("Expected %v, got %v", expected_header, actual_header)
+	}
 }
 
 func TestGetResponse__returns_jam_for_zero(t *testing.T) {
