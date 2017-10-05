@@ -34,6 +34,10 @@ func jamPostHandler(w http.ResponseWriter, r *http.Request) {
     if err != nil {
         http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
     }
+
+    if len(jam.JamText) == 0 {
+        http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+    }
 }
 
 func getResponse(responseIndex int) string  {
