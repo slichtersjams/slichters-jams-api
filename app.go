@@ -5,6 +5,8 @@ import (
     "net/http"
     "math/rand"
     "time"
+    "encoding/json"
+    "./jamstore"
 )
 
 func init() {
@@ -20,6 +22,16 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
 
 func jamPostHandler(w http.ResponseWriter, r *http.Request) {
     if r.Body == nil {
+        http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+        return
+    }
+
+    decoder := json.NewDecoder(r.Body)
+    var jam jamstore.Jam
+
+    err := decoder.Decode(&jam)
+
+    if err != nil {
         http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
     }
 }
