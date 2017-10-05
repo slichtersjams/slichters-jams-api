@@ -19,7 +19,9 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func jamPostHandler(w http.ResponseWriter, r *http.Request) {
-
+    if r.Body == nil {
+        http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+    }
 }
 
 func getResponse(responseIndex int) string  {
