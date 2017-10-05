@@ -13,7 +13,7 @@ func TestHandler__returns_correct_responses(t *testing.T) {
 	}
 
 	rr := httptest.NewRecorder()
-	test_handler := http.HandlerFunc(handler)
+	test_handler := http.HandlerFunc(getHandler)
 
 	test_handler.ServeHTTP(rr, req)
 
@@ -47,5 +47,21 @@ func TestGetResponse__returns_not_a_jam_for_1(t *testing.T) {
 	expected := "Not a Jam!"
 	if resp := getResponse(1); resp != expected {
 		t.Errorf("Expected %v, got %v", expected, resp)
+	}
+}
+
+func TestPostHandler__returns_200(t *testing.T) {
+	req, err := http.NewRequest("POST", "/jams", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	rr := httptest.NewRecorder()
+	test_handler := http.HandlerFunc(jamPostHandler)
+
+	test_handler.ServeHTTP(rr, req)
+
+	if status := rr.Code; status != http.StatusOK {
+		t.Errorf("Expected 200, got %v", status)
 	}
 }
