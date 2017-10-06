@@ -25,7 +25,7 @@ func TestStoreJam__correctly_stores_jam_in_datastore(t *testing.T) {
 
 	jamQuery := "foo"
 	jamState := true
-	if err := storeJam(ctx, jamQuery, jamState); err != nil {
+	if err := StoreJam(ctx, jamQuery, jamState); err != nil {
 		t.Fatal(err)
 	}
 

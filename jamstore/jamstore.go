@@ -10,7 +10,7 @@ type Jam struct {
 	State bool
 }
 
-func storeJam(ctx context.Context, jamText string, jamState bool) (error) {
+func StoreJam(ctx context.Context, jamText string, jamState bool) (error) {
 	jam := new(Jam)
 	jam.State = jamState
 	jam.JamText = jamText
