@@ -5,6 +5,7 @@ import (
 	"google.golang.org/appengine/aetest"
 	"google.golang.org/appengine/datastore"
 	"google.golang.org/appengine"
+	"strings"
 )
 
 func TestStoreJam__correctly_stores_jam_in_datastore(t *testing.T) {
@@ -45,5 +46,41 @@ func TestStoreJam__correctly_stores_jam_in_datastore(t *testing.T) {
 	}
 	if state := jams[0].State; state != jamState {
 		t.Errorf("Expected %v, got %v", jamState, state)
+	}
+}
+
+func TestStoreJam__correctly_stores_jam_in_datastore_with_lower_case_text(t *testing.T) {
+	inst, err := aetest.NewInstance(
+		&aetest.Options{StronglyConsistentDatastore: true})
+
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer inst.Close()
+
+	req, err := inst.NewRequest("POST", "/", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	ctx := appengine.NewContext(req)
+
+	jamText := "FOO"
+	jamState := true
+	if err := StoreJam(ctx, jamText, jamState); err != nil {
+		t.Fatal(err)
+	}
+
+	lowerText := strings.ToLower(jamText)
+	query := datastore.NewQuery("Jam").Filter("JamText =", lowerText)
+
+	var jams []Jam
+	_, err = query.GetAll(ctx, &jams)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(jams) == 0 {
+		t.Fatal("No Jams found")
 	}
 }
