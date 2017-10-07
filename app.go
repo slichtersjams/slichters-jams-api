@@ -6,7 +6,6 @@ import (
     "math/rand"
     "time"
     "encoding/json"
-    "slichters-jams-api/jamstore"
 )
 
 func init() {
@@ -27,7 +26,7 @@ func jamPostHandler(w http.ResponseWriter, r *http.Request) {
     }
 
     decoder := json.NewDecoder(r.Body)
-    var jam jamstore.Jam
+    var jam Jam
 
     err := decoder.Decode(&jam)
 
@@ -39,7 +38,7 @@ func jamPostHandler(w http.ResponseWriter, r *http.Request) {
         http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
     }
 
-    if err = jamstore.StoreJam(r.Context(), jam.JamText, jam.State); err != nil {
+    if err = StoreJam(r.Context(), jam.JamText, jam.State); err != nil {
         http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
     }
 }

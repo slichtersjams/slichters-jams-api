@@ -8,7 +8,6 @@ import (
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/aetest"
 	"google.golang.org/appengine/datastore"
-	"slichters-jams-api/jamstore"
 )
 
 func TestHandler__returns_correct_responses(t *testing.T) {
@@ -132,7 +131,7 @@ func TestPostHandler__puts_jam_in_store_on_good_post_body_and_returns_200(t *tes
 	jamText := "some jam text"
 	query := datastore.NewQuery("Jam").Filter("JamText =", jamText)
 
-	var jams []jamstore.Jam
+	var jams []Jam
 	_, err = query.GetAll(ctx, &jams)
 	if err != nil {
 		t.Fatal(err)

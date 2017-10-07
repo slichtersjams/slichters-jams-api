@@ -28,9 +28,6 @@ before_install:
   # Authenticate gcloud auth tool
   - gcloud auth activate-service-account --key-file client-secret.json
 
-  # Make jamstore package available for import
-  - cp -R jamstore $GOPATH/slicters-jams-api
-
 deploy:
   skip_cleanup: true
   provider: script

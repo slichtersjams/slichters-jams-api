@@ -1,4 +1,4 @@
-package jamstore
+package app
 
 import (
 	"google.golang.org/appengine/datastore"

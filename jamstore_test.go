@@ -1,4 +1,4 @@
-package jamstore
+package app
 
 import (
 	"testing"
