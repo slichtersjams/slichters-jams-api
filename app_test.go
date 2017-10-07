@@ -10,23 +10,6 @@ import (
 	"google.golang.org/appengine/datastore"
 )
 
-func TestPostHandler__returns_bad_request_with_bad_json(t *testing.T) {
-	reader := strings.NewReader("this is not json")
-	req, err := http.NewRequest("POST", "/jams", reader)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	rr := httptest.NewRecorder()
-	test_handler := http.HandlerFunc(jamPostHandler)
-
-	test_handler.ServeHTTP(rr, req)
-
-	if status := rr.Code; status != http.StatusBadRequest {
-		t.Errorf("Expected %v, got %v", http.StatusBadRequest, status)
-	}
-}
-
 func TestHandler__returns_correct_responses(t *testing.T) {
 	req, err := http.NewRequest("GET", "/", nil)
 	if err != nil {
@@ -73,6 +56,23 @@ func TestGetResponse__returns_not_a_jam_for_1(t *testing.T) {
 
 func TestPostHandler__returns_bad_request_with_no_body(t *testing.T) {
 	req, err := http.NewRequest("POST", "/jams", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	rr := httptest.NewRecorder()
+	test_handler := http.HandlerFunc(jamPostHandler)
+
+	test_handler.ServeHTTP(rr, req)
+
+	if status := rr.Code; status != http.StatusBadRequest {
+		t.Errorf("Expected %v, got %v", http.StatusBadRequest, status)
+	}
+}
+
+func TestPostHandler__returns_bad_request_with_bad_json(t *testing.T) {
+	reader := strings.NewReader("this is not json")
+	req, err := http.NewRequest("POST", "/jams", reader)
 	if err != nil {
 		t.Fatal(err)
 	}
