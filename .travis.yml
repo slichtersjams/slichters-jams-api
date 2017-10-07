@@ -28,6 +28,10 @@ before_install:
   # Authenticate gcloud auth tool
   - gcloud auth activate-service-account --key-file client-secret.json
 
+  # Install some components needed for testing
+  - gcloud components install app-engine-python
+  - gcloud components install app-engine-go
+
 deploy:
   skip_cleanup: true
   provider: script
