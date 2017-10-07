@@ -32,14 +32,17 @@ func jamPostHandler(w http.ResponseWriter, r *http.Request) {
 
     if err != nil {
         http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+        return
     }
 
     if len(jam.JamText) == 0 {
         http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+        return
     }
 
     if err = StoreJam(r.Context(), jam.JamText, jam.State); err != nil {
         http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+        return
     }
 }
 
