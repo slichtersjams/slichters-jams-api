@@ -8,7 +8,7 @@ import (
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/aetest"
 	"google.golang.org/appengine/datastore"
-	"./jamstore"
+	"slichters-jams-api/jamstore"
 )
 
 func TestHandler__returns_correct_responses(t *testing.T) {

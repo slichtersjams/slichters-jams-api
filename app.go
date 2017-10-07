@@ -6,7 +6,7 @@ import (
     "math/rand"
     "time"
     "encoding/json"
-    "./jamstore"
+    "slichters-jams-api/jamstore"
 )
 
 func init() {
