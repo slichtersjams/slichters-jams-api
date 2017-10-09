@@ -2,7 +2,6 @@ package app
 
 import (
 	"google.golang.org/appengine/datastore"
-	"golang.org/x/net/context"
 	"strings"
 )
 
@@ -11,13 +10,14 @@ type Jam struct {
 	State bool
 }
 
-func StoreJam(ctx context.Context, jamText string, jamState bool) (error) {
+func StoreJam(ctx IGetContext, jamText string, jamState bool) (error) {
 	jam := new(Jam)
 	jam.State = jamState
 	jam.JamText = strings.ToLower(jamText)
-	key := datastore.NewIncompleteKey(ctx, "Jam", nil)
+	context := ctx.getContext()
+	key := datastore.NewIncompleteKey(context, "Jam", nil)
 	var err error
-	key, err = datastore.Put(ctx, key, jam)
+	key, err = datastore.Put(context, key, jam)
 
 	return err
 }
