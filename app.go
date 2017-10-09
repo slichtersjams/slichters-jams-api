@@ -5,16 +5,45 @@ import (
     "net/http"
     "math/rand"
     "time"
+    "encoding/json"
 )
 
 func init() {
-    http.HandleFunc("/", handler)
+    http.HandleFunc("/", getHandler)
+    http.HandleFunc("/jams", jamPostHandler)
     rand.Seed(time.Now().UTC().UnixNano())
 }
 
-func handler(w http.ResponseWriter, r *http.Request) {
+func getHandler(w http.ResponseWriter, r *http.Request) {
     w.Header().Add("Access-Control-Allow-Origin", "*")
     fmt.Fprint(w, getResponse(rand.Intn(2)))
+}
+
+func jamPostHandler(w http.ResponseWriter, r *http.Request) {
+    if r.Body == nil {
+        http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+        return
+    }
+
+    decoder := json.NewDecoder(r.Body)
+    var jam Jam
+
+    err := decoder.Decode(&jam)
+
+    if err != nil {
+        http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+        return
+    }
+
+    if len(jam.JamText) == 0 {
+        http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+        return
+    }
+
+    if err = StoreJam(r.Context(), jam.JamText, jam.State); err != nil {
+        http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+        return
+    }
 }
 
 func getResponse(responseIndex int) string  {
