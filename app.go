@@ -6,7 +6,17 @@ import (
     "math/rand"
     "time"
     "encoding/json"
+    "google.golang.org/appengine"
+    "context"
 )
+
+type GetContext struct {
+    req *http.Request
+}
+
+func (c *GetContext) getContext() (context.Context) {
+    return appengine.NewContext(c.req)
+}
 
 func init() {
     http.HandleFunc("/", getHandler)
@@ -40,7 +50,10 @@ func jamPostHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    if err = StoreJam(r.Context(), jam.JamText, jam.State); err != nil {
+    contextGetter := new(GetContext)
+    contextGetter.req = r
+
+    if err = StoreJam(contextGetter, jam.JamText, jam.State); err != nil {
         http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
         return
     }

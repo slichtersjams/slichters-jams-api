@@ -118,12 +118,11 @@ func TestPostHandler__puts_jam_in_store_on_good_post_body_and_returns_200(t *tes
 	if err != nil {
 		t.Fatal(err)
 	}
-	ctx := appengine.NewContext(req)
 
 	rr := httptest.NewRecorder()
 	test_handler := http.HandlerFunc(jamPostHandler)
 
-	test_handler.ServeHTTP(rr, req.WithContext(ctx))
+	test_handler.ServeHTTP(rr, req)
 
 	if status := rr.Code; status != http.StatusOK {
 		t.Errorf("Expected 200, got %v", status)
@@ -131,6 +130,7 @@ func TestPostHandler__puts_jam_in_store_on_good_post_body_and_returns_200(t *tes
 	jamText := "some jam text"
 	query := datastore.NewQuery("Jam").Filter("JamText =", jamText)
 
+	ctx := appengine.NewContext(req)
 	var jams []Jam
 	_, err = query.GetAll(ctx, &jams)
 	if err != nil {
