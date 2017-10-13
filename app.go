@@ -7,16 +7,7 @@ import (
     "time"
     "encoding/json"
     "google.golang.org/appengine"
-    "context"
 )
-
-type GetContext struct {
-    req *http.Request
-}
-
-func (c *GetContext) getContext() (context.Context) {
-    return appengine.NewContext(c.req)
-}
 
 func init() {
     http.HandleFunc("/", getHandler)
@@ -50,10 +41,11 @@ func jamPostHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    contextGetter := new(GetContext)
-    contextGetter.req = r
+    ctx := appengine.NewContext(r)
 
-    if err = StoreJam(contextGetter, jam.JamText, jam.State); err != nil {
+    dataStore := DataStore{ctx}
+
+    if err = StoreJam(&dataStore, jam.JamText, jam.State); err != nil {
         http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
         return
     }
