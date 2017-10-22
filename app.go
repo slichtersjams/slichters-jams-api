@@ -25,14 +25,14 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
         ctx := appengine.NewContext(r)
         dataStore := DataStore{ctx}
 
-        getJamResponse(dataStore, jamText, w)
+        getJamResponse(&dataStore, jamText, w)
     } else {
         fmt.Fprint(w, GetRandomJam())
     }
 }
 
-func getJamResponse(dataStore DataStore, jamText string, w http.ResponseWriter) {
-    jamState, err := GetJamState(&dataStore, jamText)
+func getJamResponse(dataStore IDataStore, jamText string, w http.ResponseWriter) {
+    jamState, err := GetJamState(dataStore, jamText)
     if err != nil {
         if err == datastore.ErrNoSuchEntity {
             http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
