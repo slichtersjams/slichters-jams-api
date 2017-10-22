@@ -52,33 +52,31 @@ func getJamResponse(dataStore IDataStore, jamText string, w http.ResponseWriter)
 }
 
 func jamPostHandler(w http.ResponseWriter, r *http.Request) {
-    if r.Body == nil {
-        http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
-        return
-    }
-
-    decoder := json.NewDecoder(r.Body)
-    var jam Jam
-
-    err := decoder.Decode(&jam)
-
-    if err != nil {
-        http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
-        return
-    }
-
-    if len(jam.JamText) == 0 {
-        http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
-        return
-    }
-
     ctx := appengine.NewContext(r)
 
     dataStore := DataStore{ctx}
 
+    postJam(r, w, dataStore)
+}
+
+func postJam(r *http.Request, w http.ResponseWriter, dataStore DataStore) {
+    if r.Body == nil {
+        http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+        return
+    }
+    decoder := json.NewDecoder(r.Body)
+    var jam Jam
+    err := decoder.Decode(&jam)
+    if err != nil {
+        http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+        return
+    }
+    if len(jam.JamText) == 0 {
+        http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+        return
+    }
     if err = StoreJam(&dataStore, jam.JamText, jam.State); err != nil {
         http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-        return
     }
 }
 
