@@ -15,7 +15,7 @@ func fakeRandomJamGenerator() string {
 	return "Random Jam"
 }
 
-func TestHandler__returns_correct_responses(t *testing.T) {
+func TestHandler__returns_random_response_if_no_query(t *testing.T) {
 	var oldRandJamFunc = GetRandomJam
 	GetRandomJam = fakeRandomJamGenerator
 	req, err := http.NewRequest("GET", "/", nil)

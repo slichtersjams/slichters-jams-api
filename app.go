@@ -9,7 +9,7 @@ import (
     "google.golang.org/appengine"
 )
 
-var GetRandomJam = getResponse
+var GetRandomJam = getRandomResponse
 
 func init() {
     http.HandleFunc("/", getHandler)
@@ -19,7 +19,21 @@ func init() {
 
 func getHandler(w http.ResponseWriter, r *http.Request) {
     w.Header().Add("Access-Control-Allow-Origin", "*")
-    fmt.Fprint(w, GetRandomJam())
+    response := GetRandomJam()
+    jamText := r.URL.Query().Get("jamText")
+    if jamText != "" {
+        response = "Jam!"
+        //ctx := appengine.NewContext(r)
+		//
+        //dataStore := DataStore{ctx}
+        //jamState, _ := GetJamState(&dataStore, jamText)
+        //if jamState {
+        //    response = "Jam!"
+        //} else {
+        //    response = "Not a Jam!"
+        //}
+    }
+    fmt.Fprint(w, response)
 }
 
 func jamPostHandler(w http.ResponseWriter, r *http.Request) {
@@ -53,7 +67,7 @@ func jamPostHandler(w http.ResponseWriter, r *http.Request) {
     }
 }
 
-func getResponse() string  {
+func getRandomResponse() string  {
     if rand.Intn(2) == 1 {
         return "Not a Jam!"
     }
