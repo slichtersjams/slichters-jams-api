@@ -65,38 +65,38 @@ func TestHandler__returns_correct_response_if_it_is_a_jam(t *testing.T) {
 	GetRandomJam = oldRandJamFunc
 }
 
-//func TestHandler__returns_correct_response_if_it_is_not_a_jam(t *testing.T) {
-//	var oldRandJamFunc = GetRandomJam
-//	GetRandomJam = fakeRandomJamGenerator
-//	inst, err := aetest.NewInstance(
-//		&aetest.Options{StronglyConsistentDatastore: true})
-//	assert.Nil(t, err)
-//	defer inst.Close()
-//
-//	req, err := inst.NewRequest("GET", "/", nil)
-//	assert.Nil(t, err)
-//
-//	query := req.URL.Query()
-//	query.Add("jamText", "Some Jam Text")
-//	req.URL.RawQuery = query.Encode()
-//
-//	ctx := appengine.NewContext(req)
-//	storededJam := Jam{"some jam text", false}
-//
-//	key := datastore.NewIncompleteKey(ctx, "Jam", nil)
-//	_, err = datastore.Put(ctx, key, &storededJam)
-//	assert.Nil(t, err)
-//
-//	rr := httptest.NewRecorder()
-//	test_handler := http.HandlerFunc(getHandler)
-//
-//	test_handler.ServeHTTP(rr, req)
-//
-//	assert.Equal(t, http.StatusOK, rr.Code)
-//	assert.Equal(t, "Not a Jam!", rr.Body.String())
-//	assert.Equal(t, "*", rr.Header().Get("Access-Control-Allow-Origin"))
-//	GetRandomJam = oldRandJamFunc
-//}
+func TestHandler__returns_correct_response_if_it_is_not_a_jam(t *testing.T) {
+	var oldRandJamFunc = GetRandomJam
+	GetRandomJam = fakeRandomJamGenerator
+	inst, err := aetest.NewInstance(
+		&aetest.Options{StronglyConsistentDatastore: true})
+	assert.Nil(t, err)
+	defer inst.Close()
+
+	req, err := inst.NewRequest("GET", "/", nil)
+	assert.Nil(t, err)
+
+	query := req.URL.Query()
+	query.Add("jamText", "Some Jam Text")
+	req.URL.RawQuery = query.Encode()
+
+	ctx := appengine.NewContext(req)
+	storededJam := Jam{"some jam text", false}
+
+	key := datastore.NewIncompleteKey(ctx, "Jam", nil)
+	_, err = datastore.Put(ctx, key, &storededJam)
+	assert.Nil(t, err)
+
+	rr := httptest.NewRecorder()
+	test_handler := http.HandlerFunc(getHandler)
+
+	test_handler.ServeHTTP(rr, req)
+
+	assert.Equal(t, http.StatusOK, rr.Code)
+	assert.Equal(t, "Not a Jam!", rr.Body.String())
+	assert.Equal(t, "*", rr.Header().Get("Access-Control-Allow-Origin"))
+	GetRandomJam = oldRandJamFunc
+}
 
 func TestPostHandler__returns_bad_request_with_no_body(t *testing.T) {
 	req, err := http.NewRequest("POST", "/jams", nil)

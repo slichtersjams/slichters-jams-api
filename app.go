@@ -23,15 +23,15 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
     jamText := r.URL.Query().Get("jamText")
     if jamText != "" {
         response = "Jam!"
-        //ctx := appengine.NewContext(r)
-		//
-        //dataStore := DataStore{ctx}
-        //jamState, _ := GetJamState(&dataStore, jamText)
-        //if jamState {
-        //    response = "Jam!"
-        //} else {
-        //    response = "Not a Jam!"
-        //}
+        ctx := appengine.NewContext(r)
+
+        dataStore := DataStore{ctx}
+        jamState, _ := GetJamState(&dataStore, jamText)
+        if jamState {
+            response = "Jam!"
+        } else {
+            response = "Not a Jam!"
+        }
     }
     fmt.Fprint(w, response)
 }
