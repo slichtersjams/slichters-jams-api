@@ -15,3 +15,20 @@ func (d *DataStore)Put(jam Jam) error {
 
 	return err
 }
+
+func (d *DataStore)Get(jamText string) (Jam, error) {
+	query := datastore.NewQuery("Jam").Filter("JamText =", jamText)
+
+	var jams []Jam
+	_, err :=query.GetAll(d.Context, &jams)
+
+	var jam Jam
+
+	if len(jams) > 0 {
+		jam = jams[0]
+	} else if err == nil {
+		err = datastore.ErrNoSuchEntity
+	}
+
+	return jam, err
+}
