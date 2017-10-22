@@ -36,6 +36,9 @@ func getJamResponse(dataStore IDataStore, jamText string, w http.ResponseWriter)
     if err != nil {
         if err == datastore.ErrNoSuchEntity {
             http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+        } else {
+            http.Error(w, http.StatusText(http.StatusInternalServerError) + " : " + err.Error(),
+                http.StatusInternalServerError)
         }
     } else {
         var response string

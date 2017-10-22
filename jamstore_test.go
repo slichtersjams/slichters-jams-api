@@ -9,6 +9,7 @@ import (
 
 type FakeDataStore struct {
 	StoredJam Jam
+	Error error
 }
 
 func (fake *FakeDataStore)Put(jam Jam) error {
@@ -18,11 +19,13 @@ func (fake *FakeDataStore)Put(jam Jam) error {
 
 func (fake *FakeDataStore)Get(jamText string) (Jam, error) {
 	jam := Jam{"", false}
-	var err error = nil
-	if jamText == fake.StoredJam.JamText {
-		jam = fake.StoredJam
-	} else {
-		err = datastore.ErrNoSuchEntity
+	err := fake.Error
+	if err == nil {
+		if jamText == fake.StoredJam.JamText {
+			jam = fake.StoredJam
+		} else {
+			err = datastore.ErrNoSuchEntity
+		}
 	}
 	return jam, err
 }

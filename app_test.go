@@ -65,6 +65,17 @@ func TestGetJamResponse__returns_bad_request_if_query_not_in_data_store(t *testi
 	assert.Equal(t, http.StatusBadRequest, rr.Code)
 }
 
+func TestGetJamResponse__returns_internal_error_if_datastore_has_errors(t *testing.T) {
+	fakeDataStore := new(FakeDataStore)
+	fakeDataStore.Error = datastore.ErrInvalidKey
+
+	rr := httptest.NewRecorder()
+
+	getJamResponse(fakeDataStore, "meat loaves", rr)
+	assert.Equal(t, http.StatusInternalServerError, rr.Code)
+	assert.Equal(t, "Internal Server Error : datastore: invalid key\n", rr.Body.String())
+}
+
 func TestPostHandler__returns_bad_request_with_no_body(t *testing.T) {
 	req, err := http.NewRequest("POST", "/jams", nil)
 	if err != nil {
