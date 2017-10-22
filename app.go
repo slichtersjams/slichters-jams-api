@@ -9,6 +9,8 @@ import (
     "google.golang.org/appengine"
 )
 
+var GetRandomJam = getResponse
+
 func init() {
     http.HandleFunc("/", getHandler)
     http.HandleFunc("/jams", jamPostHandler)
@@ -17,7 +19,7 @@ func init() {
 
 func getHandler(w http.ResponseWriter, r *http.Request) {
     w.Header().Add("Access-Control-Allow-Origin", "*")
-    fmt.Fprint(w, getResponse(rand.Intn(2)))
+    fmt.Fprint(w, GetRandomJam())
 }
 
 func jamPostHandler(w http.ResponseWriter, r *http.Request) {
@@ -51,8 +53,8 @@ func jamPostHandler(w http.ResponseWriter, r *http.Request) {
     }
 }
 
-func getResponse(responseIndex int) string  {
-    if responseIndex == 1 {
+func getResponse() string  {
+    if rand.Intn(2) == 1 {
         return "Not a Jam!"
     }
     return "Jam!"
