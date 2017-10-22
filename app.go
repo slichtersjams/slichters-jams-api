@@ -7,6 +7,7 @@ import (
     "time"
     "encoding/json"
     "google.golang.org/appengine"
+    "google.golang.org/appengine/datastore"
 )
 
 var GetRandomJam = getRandomResponse
@@ -26,7 +27,13 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
         ctx := appengine.NewContext(r)
 
         dataStore := DataStore{ctx}
-        jamState, _ := GetJamState(&dataStore, jamText)
+        jamState, err := GetJamState(&dataStore, jamText)
+        if err != nil {
+            if err == datastore.ErrNoSuchEntity {
+                http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+                return
+            }
+        }
         if jamState {
             response = "Jam!"
         } else {

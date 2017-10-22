@@ -98,6 +98,27 @@ func TestHandler__returns_correct_response_if_it_is_not_a_jam(t *testing.T) {
 	GetRandomJam = oldRandJamFunc
 }
 
+func TestHandler__returns_bad_request_if_query_not_in_data_store(t *testing.T) {
+	inst, err := aetest.NewInstance(
+		&aetest.Options{StronglyConsistentDatastore: true})
+	assert.Nil(t, err)
+	defer inst.Close()
+
+	req, err := inst.NewRequest("GET", "/", nil)
+	assert.Nil(t, err)
+
+	query := req.URL.Query()
+	query.Add("jamText", "Some Jam Text")
+	req.URL.RawQuery = query.Encode()
+
+	rr := httptest.NewRecorder()
+	test_handler := http.HandlerFunc(getHandler)
+
+	test_handler.ServeHTTP(rr, req)
+
+	assert.Equal(t, http.StatusBadRequest, rr.Code)
+}
+
 func TestPostHandler__returns_bad_request_with_no_body(t *testing.T) {
 	req, err := http.NewRequest("POST", "/jams", nil)
 	if err != nil {
