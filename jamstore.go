@@ -12,8 +12,8 @@ func StoreJam(data_store IDataStore, jamText string, jamState bool) (error) {
 	return data_store.Put(jam)
 }
 
-func GetJamState(data_store IDataStore, jamText string) bool {
-	jam, _ := data_store.Get(strings.ToLower(jamText))
+func GetJamState(data_store IDataStore, jamText string) (bool, error) {
+	jam, err := data_store.Get(strings.ToLower(jamText))
 
-	return jam.State
+	return jam.State, err
 }

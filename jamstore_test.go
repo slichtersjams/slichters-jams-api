@@ -4,6 +4,7 @@ import (
 	"testing"
 	"strings"
 	"github.com/stretchr/testify/assert"
+	"google.golang.org/appengine/datastore"
 )
 
 type FakeDataStore struct {
@@ -17,10 +18,13 @@ func (fake *FakeDataStore)Put(jam Jam) error {
 
 func (fake *FakeDataStore)Get(jamText string) (Jam, error) {
 	jam := Jam{"", false}
+	var err error = nil
 	if jamText == fake.StoredJam.JamText {
 		jam = fake.StoredJam
+	} else {
+		err = datastore.ErrNoSuchEntity
 	}
-	return jam, nil
+	return jam, err
 }
 
 func TestStoreJam__correctly_stores_jam_in_datastore(t *testing.T) {
@@ -47,7 +51,8 @@ func TestGetJam__gets_jam_from_datastore(t *testing.T) {
 	storedJam := Jam{"meat loaves", true}
 	fakeDataStore := new(FakeDataStore)
 	fakeDataStore.StoredJam = storedJam
-	jamState := GetJamState(fakeDataStore, storedJam.JamText)
+	jamState, err := GetJamState(fakeDataStore, storedJam.JamText)
+	assert.Nil(t, err)
 	assert.Equal(t, storedJam.State, jamState)
 }
 
@@ -55,6 +60,13 @@ func TestGetJam__gets_jam_from_datastore_when_text_is_not_lower_case(t *testing.
 	storedJam := Jam{"meat loaves", true}
 	fakeDataStore := new(FakeDataStore)
 	fakeDataStore.StoredJam = storedJam
-	jamState := GetJamState(fakeDataStore, "MeAt LoAvEs")
+	jamState, err := GetJamState(fakeDataStore, "MeAt LoAvEs")
+	assert.Nil(t, err)
 	assert.Equal(t, storedJam.State, jamState)
+}
+
+func TestGetJam__returns_errors_from_data_store(t *testing.T) {
+	fakeDataStore := new(FakeDataStore)
+	_, err := GetJamState(fakeDataStore, "meat loaves")
+	assert.Equal(t, datastore.ErrNoSuchEntity, err)
 }
