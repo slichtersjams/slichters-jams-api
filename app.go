@@ -56,10 +56,10 @@ func jamPostHandler(w http.ResponseWriter, r *http.Request) {
 
     dataStore := DataStore{ctx}
 
-    postJam(r, w, dataStore)
+    postJam(r, w, &dataStore)
 }
 
-func postJam(r *http.Request, w http.ResponseWriter, dataStore DataStore) {
+func postJam(r *http.Request, w http.ResponseWriter, dataStore IDataStore) {
     if r.Body == nil {
         http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
         return
@@ -75,7 +75,7 @@ func postJam(r *http.Request, w http.ResponseWriter, dataStore DataStore) {
         http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
         return
     }
-    if err = StoreJam(&dataStore, jam.JamText, jam.State); err != nil {
+    if err = StoreJam(dataStore, jam.JamText, jam.State); err != nil {
         http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
     }
 }

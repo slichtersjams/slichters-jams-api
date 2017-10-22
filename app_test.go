@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"strings"
-	"google.golang.org/appengine"
 	"google.golang.org/appengine/aetest"
 	"google.golang.org/appengine/datastore"
 	"github.com/stretchr/testify/assert"
@@ -76,63 +75,79 @@ func TestGetJamResponse__returns_internal_error_if_datastore_has_errors(t *testi
 	assert.Equal(t, "Internal Server Error : datastore: invalid key\n", rr.Body.String())
 }
 
-func TestPostHandler__returns_bad_request_with_no_body(t *testing.T) {
-	inst, err := aetest.NewInstance(
-		&aetest.Options{StronglyConsistentDatastore: true})
-	assert.Nil(t, err)
-
-	defer inst.Close()
-
-	req, err := inst.NewRequest("POST", "/jams", nil)
+func TestPostJam__returns_bad_request_with_no_body(t *testing.T) {
+	req, err := http.NewRequest("POST", "/jams", nil)
 	assert.Nil(t, err)
 
 	rr := httptest.NewRecorder()
-	test_handler := http.HandlerFunc(jamPostHandler)
 
-	test_handler.ServeHTTP(rr, req)
+	fakeDataStore := new(FakeDataStore)
+
+	postJam(req, rr, fakeDataStore)
 
 	assert.Equal(t, http.StatusBadRequest, rr.Code)
 }
 
-func TestPostHandler__returns_bad_request_with_bad_json(t *testing.T) {
-	inst, err := aetest.NewInstance(
-		&aetest.Options{StronglyConsistentDatastore: true})
-	assert.Nil(t, err)
-
-	defer inst.Close()
-
+func TestPostJam__returns_bad_request_with_bad_json(t *testing.T) {
 	reader := strings.NewReader("this is not json")
-	req, err := inst.NewRequest("POST", "/jams", reader)
+	req, err := http.NewRequest("POST", "/jams", reader)
 	assert.Nil(t, err)
 
 	rr := httptest.NewRecorder()
-	test_handler := http.HandlerFunc(jamPostHandler)
 
-	test_handler.ServeHTTP(rr, req)
+	fakeDataStore := new(FakeDataStore)
+
+	postJam(req, rr, fakeDataStore)
 
 	assert.Equal(t, http.StatusBadRequest, rr.Code)
 }
 
-func TestPostHandler__returns_bad_request_with_incorrect_json(t *testing.T) {
-	inst, err := aetest.NewInstance(
-		&aetest.Options{StronglyConsistentDatastore: true})
-	assert.Nil(t, err)
-
-	defer inst.Close()
-
+func TestPostJam__returns_bad_request_with_incorrect_json(t *testing.T) {
 	reader := strings.NewReader(`{"Bar": "Foo"}`)
-	req, err := inst.NewRequest("POST", "/jams", reader)
+	req, err := http.NewRequest("POST", "/jams", reader)
 	assert.Nil(t, err)
 
 	rr := httptest.NewRecorder()
-	test_handler := http.HandlerFunc(jamPostHandler)
 
-	test_handler.ServeHTTP(rr, req)
+	fakeDataStore := new(FakeDataStore)
+
+	postJam(req, rr, fakeDataStore)
 
 	assert.Equal(t, http.StatusBadRequest, rr.Code)
 }
 
-func TestPostHandler__puts_jam_in_store_on_good_post_body_and_returns_200(t *testing.T) {
+func TestPostJam__returns_internal_server_failure_when_datastore_has_errors(t *testing.T) {
+	reader := strings.NewReader(`{"JamText": "some jam text", "State": true}`)
+	req, err := http.NewRequest("POST", "/jams", reader)
+	assert.Nil(t, err)
+
+	rr := httptest.NewRecorder()
+
+	fakeDataStore := new(FakeDataStore)
+	fakeDataStore.Error = datastore.ErrInvalidKey
+
+	postJam(req, rr, fakeDataStore)
+
+	assert.Equal(t, http.StatusInternalServerError, rr.Code)
+}
+
+func TestPostJam__puts_jam_in_store(t *testing.T) {
+	reader := strings.NewReader(`{"JamText": "some jam text", "State": true}`)
+	req, err := http.NewRequest("POST", "/jams", reader)
+	assert.Nil(t, err)
+
+	rr := httptest.NewRecorder()
+
+	fakeDataStore := new(FakeDataStore)
+
+	postJam(req, rr, fakeDataStore)
+
+	expectedJam := Jam{"some jam text", true}
+
+	assert.Equal(t, expectedJam, fakeDataStore.StoredJam)
+}
+
+func TestPostHandler__returns_200_with_good_json(t *testing.T) {
 	inst, err := aetest.NewInstance(
 		&aetest.Options{StronglyConsistentDatastore: true})
 	assert.Nil(t, err)
@@ -148,16 +163,4 @@ func TestPostHandler__puts_jam_in_store_on_good_post_body_and_returns_200(t *tes
 	test_handler.ServeHTTP(rr, req)
 
 	assert.Equal(t, http.StatusOK, rr.Code)
-
-	jamText := "some jam text"
-	query := datastore.NewQuery("Jam").Filter("JamText =", jamText)
-
-	ctx := appengine.NewContext(req)
-	var jams []Jam
-	_, err = query.GetAll(ctx, &jams)
-	assert.Nil(t, err)
-
-	assert.NotEmpty(t, jams)
-	assert.Equal(t, jamText, jams[0].JamText)
-	assert.Equal(t, true, jams[0].State)
 }

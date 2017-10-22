@@ -9,7 +9,7 @@ type FakeDataStore struct {
 
 func (fake *FakeDataStore)Put(jam Jam) error {
 	fake.StoredJam = jam
-	return nil
+	return fake.Error
 }
 
 func (fake *FakeDataStore)Get(jamText string) (Jam, error) {
