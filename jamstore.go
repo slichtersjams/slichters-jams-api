@@ -13,7 +13,7 @@ func StoreJam(data_store IDataStore, jamText string, jamState bool) (error) {
 }
 
 func GetJamState(data_store IDataStore, jamText string) bool {
-	jam, _ := data_store.Get(jamText)
+	jam, _ := data_store.Get(strings.ToLower(jamText))
 
 	return jam.State
 }

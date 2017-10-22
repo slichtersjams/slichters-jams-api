@@ -16,7 +16,7 @@ func (fake *FakeDataStore)Put(jam Jam) error {
 }
 
 func (fake *FakeDataStore)Get(jamText string) (Jam, error) {
-	var jam Jam
+	jam := Jam{"", false}
 	if jamText == fake.StoredJam.JamText {
 		jam = fake.StoredJam
 	}
@@ -48,5 +48,13 @@ func TestGetJam__gets_jam_from_datastore(t *testing.T) {
 	fakeDataStore := new(FakeDataStore)
 	fakeDataStore.StoredJam = storedJam
 	jamState := GetJamState(fakeDataStore, storedJam.JamText)
+	assert.Equal(t, storedJam.State, jamState)
+}
+
+func TestGetJam__gets_jam_from_datastore_when_text_is_not_lower_case(t *testing.T) {
+	storedJam := Jam{"meat loaves", true}
+	fakeDataStore := new(FakeDataStore)
+	fakeDataStore.StoredJam = storedJam
+	jamState := GetJamState(fakeDataStore, "MeAt LoAvEs")
 	assert.Equal(t, storedJam.State, jamState)
 }
