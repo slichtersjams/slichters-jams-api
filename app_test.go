@@ -5,145 +5,162 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"strings"
-	"google.golang.org/appengine"
 	"google.golang.org/appengine/aetest"
 	"google.golang.org/appengine/datastore"
+	"github.com/stretchr/testify/assert"
 )
 
-func TestHandler__returns_correct_responses(t *testing.T) {
+func fakeRandomJamGenerator() string {
+	return "Random Jam"
+}
+
+func TestHandler__returns_random_response_if_no_query(t *testing.T) {
+	var oldRandJamFunc = GetRandomJam
+	GetRandomJam = fakeRandomJamGenerator
 	req, err := http.NewRequest("GET", "/", nil)
-	if err != nil {
-		t.Fatal(err)
-	}
+	assert.Nil(t, err)
 
 	rr := httptest.NewRecorder()
 	test_handler := http.HandlerFunc(getHandler)
 
 	test_handler.ServeHTTP(rr, req)
 
-	if status := rr.Code; status != http.StatusOK {
-		t.Errorf("Expected 200, got %v", status)
-	}
-
-	expected := "Jam!"
-
-	if actual := rr.Body.String(); actual != expected {
-		expected := "Not a Jam!"
-		if actual := rr.Body.String(); actual != expected {
-			t.Errorf("Expected %v, got %v", expected, actual)
-		}
-	}
-
-	expected_header := "*"
-	if actual_header := rr.Header().Get("Access-Control-Allow-Origin"); actual_header != expected_header {
-		t.Errorf("Expected %v, got %v", expected_header, actual_header)
-	}
+	assert.Equal(t, http.StatusOK, rr.Code)
+	assert.Equal(t, "Random Jam", rr.Body.String())
+	assert.Equal(t, "*", rr.Header().Get("Access-Control-Allow-Origin"))
+	GetRandomJam = oldRandJamFunc
 }
 
-func TestGetResponse__returns_jam_for_zero(t *testing.T) {
-	expected := "Jam!"
-	if resp := getResponse(0); resp != expected {
-		t.Errorf("Expected %v, got %v", expected, resp)
-	}
-}
-
-func TestGetResponse__returns_not_a_jam_for_1(t *testing.T) {
-	expected := "Not a Jam!"
-	if resp := getResponse(1); resp != expected {
-		t.Errorf("Expected %v, got %v", expected, resp)
-	}
-}
-
-func TestPostHandler__returns_bad_request_with_no_body(t *testing.T) {
-	req, err := http.NewRequest("POST", "/jams", nil)
-	if err != nil {
-		t.Fatal(err)
-	}
+func TestGetJamResponse__returns_correct_response_if_it_is_a_jam(t *testing.T) {
+	storedJam := Jam{"meat loaves", true}
+	fakeDataStore := new(FakeDataStore)
+	fakeDataStore.StoredJam = storedJam
 
 	rr := httptest.NewRecorder()
-	test_handler := http.HandlerFunc(jamPostHandler)
 
-	test_handler.ServeHTTP(rr, req)
-
-	if status := rr.Code; status != http.StatusBadRequest {
-		t.Errorf("Expected %v, got %v", http.StatusBadRequest, status)
-	}
+	getJamResponse(fakeDataStore, "meat loaves", rr)
+	assert.Equal(t, http.StatusOK, rr.Code)
+	assert.Equal(t, "Jam!", rr.Body.String())
 }
 
-func TestPostHandler__returns_bad_request_with_bad_json(t *testing.T) {
+func TestGetJamResponse__returns_correct_response_if_it_is_not_a_jam(t *testing.T) {
+	storedJam := Jam{"meat loaves", false}
+	fakeDataStore := new(FakeDataStore)
+	fakeDataStore.StoredJam = storedJam
+
+	rr := httptest.NewRecorder()
+
+	getJamResponse(fakeDataStore, "meat loaves", rr)
+	assert.Equal(t, http.StatusOK, rr.Code)
+	assert.Equal(t, "Not a Jam!", rr.Body.String())
+}
+
+func TestGetJamResponse__returns_bad_request_if_query_not_in_data_store(t *testing.T) {
+	fakeDataStore := new(FakeDataStore)
+
+	rr := httptest.NewRecorder()
+
+	getJamResponse(fakeDataStore, "meat loaves", rr)
+	assert.Equal(t, http.StatusBadRequest, rr.Code)
+}
+
+func TestGetJamResponse__returns_internal_error_if_datastore_has_errors(t *testing.T) {
+	fakeDataStore := new(FakeDataStore)
+	fakeDataStore.Error = datastore.ErrInvalidKey
+
+	rr := httptest.NewRecorder()
+
+	getJamResponse(fakeDataStore, "meat loaves", rr)
+	assert.Equal(t, http.StatusInternalServerError, rr.Code)
+	assert.Equal(t, "Internal Server Error : datastore: invalid key\n", rr.Body.String())
+}
+
+func TestPostJam__returns_bad_request_with_no_body(t *testing.T) {
+	req, err := http.NewRequest("POST", "/jams", nil)
+	assert.Nil(t, err)
+
+	rr := httptest.NewRecorder()
+
+	fakeDataStore := new(FakeDataStore)
+
+	postJam(req, rr, fakeDataStore)
+
+	assert.Equal(t, http.StatusBadRequest, rr.Code)
+}
+
+func TestPostJam__returns_bad_request_with_bad_json(t *testing.T) {
 	reader := strings.NewReader("this is not json")
 	req, err := http.NewRequest("POST", "/jams", reader)
-	if err != nil {
-		t.Fatal(err)
-	}
+	assert.Nil(t, err)
 
 	rr := httptest.NewRecorder()
-	test_handler := http.HandlerFunc(jamPostHandler)
 
-	test_handler.ServeHTTP(rr, req)
+	fakeDataStore := new(FakeDataStore)
 
-	if status := rr.Code; status != http.StatusBadRequest {
-		t.Errorf("Expected %v, got %v", http.StatusBadRequest, status)
-	}
+	postJam(req, rr, fakeDataStore)
+
+	assert.Equal(t, http.StatusBadRequest, rr.Code)
 }
 
-func TestPostHandler__returns_bad_request_with_incorrect_json(t *testing.T) {
+func TestPostJam__returns_bad_request_with_incorrect_json(t *testing.T) {
 	reader := strings.NewReader(`{"Bar": "Foo"}`)
 	req, err := http.NewRequest("POST", "/jams", reader)
-	if err != nil {
-		t.Fatal(err)
-	}
+	assert.Nil(t, err)
 
 	rr := httptest.NewRecorder()
-	test_handler := http.HandlerFunc(jamPostHandler)
 
-	test_handler.ServeHTTP(rr, req)
+	fakeDataStore := new(FakeDataStore)
 
-	if status := rr.Code; status != http.StatusBadRequest {
-		t.Errorf("Expected %v, got %v", http.StatusBadRequest, status)
-	}
+	postJam(req, rr, fakeDataStore)
+
+	assert.Equal(t, http.StatusBadRequest, rr.Code)
 }
 
-func TestPostHandler__puts_jam_in_store_on_good_post_body_and_returns_200(t *testing.T) {
+func TestPostJam__returns_internal_server_failure_when_datastore_has_errors(t *testing.T) {
+	reader := strings.NewReader(`{"JamText": "some jam text", "State": true}`)
+	req, err := http.NewRequest("POST", "/jams", reader)
+	assert.Nil(t, err)
+
+	rr := httptest.NewRecorder()
+
+	fakeDataStore := new(FakeDataStore)
+	fakeDataStore.Error = datastore.ErrInvalidKey
+
+	postJam(req, rr, fakeDataStore)
+
+	assert.Equal(t, http.StatusInternalServerError, rr.Code)
+}
+
+func TestPostJam__puts_jam_in_store(t *testing.T) {
+	reader := strings.NewReader(`{"JamText": "some jam text", "State": true}`)
+	req, err := http.NewRequest("POST", "/jams", reader)
+	assert.Nil(t, err)
+
+	rr := httptest.NewRecorder()
+
+	fakeDataStore := new(FakeDataStore)
+
+	postJam(req, rr, fakeDataStore)
+
+	expectedJam := Jam{"some jam text", true}
+
+	assert.Equal(t, expectedJam, fakeDataStore.StoredJam)
+}
+
+func TestPostHandler__returns_200_with_good_json(t *testing.T) {
 	inst, err := aetest.NewInstance(
 		&aetest.Options{StronglyConsistentDatastore: true})
-
-	if err != nil {
-		t.Fatal(err)
-	}
+	assert.Nil(t, err)
 	defer inst.Close()
 
 	reader := strings.NewReader(`{"JamText": "some jam text", "State": true}`)
 	req, err := inst.NewRequest("POST", "/jams", reader)
-	if err != nil {
-		t.Fatal(err)
-	}
+	assert.Nil(t, err)
 
 	rr := httptest.NewRecorder()
 	test_handler := http.HandlerFunc(jamPostHandler)
 
 	test_handler.ServeHTTP(rr, req)
 
-	if status := rr.Code; status != http.StatusOK {
-		t.Errorf("Expected 200, got %v", status)
-	}
-	jamText := "some jam text"
-	query := datastore.NewQuery("Jam").Filter("JamText =", jamText)
-
-	ctx := appengine.NewContext(req)
-	var jams []Jam
-	_, err = query.GetAll(ctx, &jams)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if len(jams) == 0 {
-		t.Fatal("No Jams found")
-	}
-	if query := jams[0].JamText; query != jamText {
-		t.Errorf("Expected %v, got %v", jamText, query)
-	}
-	if state := jams[0].State; state != true {
-		t.Errorf("Expected true, got %v", state)
-	}
+	assert.Equal(t, http.StatusOK, rr.Code)
 }
