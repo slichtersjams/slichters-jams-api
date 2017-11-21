@@ -31,6 +31,18 @@ func TestHandler__returns_random_response_if_no_query(t *testing.T) {
 	GetRandomJam = oldRandJamFunc
 }
 
+func TestGetJamResponse__puts_json_content_type_header(t *testing.T) {
+	storedJam := Jam{"meat loaves", true}
+	fakeDataStore := new(FakeDataStore)
+	fakeDataStore.StoredJam = storedJam
+
+	rr := httptest.NewRecorder()
+
+	getJamResponse(fakeDataStore, "meat loaves", rr)
+
+	assert.Equal(t, "application/json", rr.Header().Get("Content-Type"))
+}
+
 func TestGetJamResponse__returns_correct_response_if_it_is_a_jam(t *testing.T) {
 	storedJam := Jam{"meat loaves", true}
 	fakeDataStore := new(FakeDataStore)

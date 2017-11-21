@@ -49,6 +49,7 @@ func getJamResponse(dataStore IDataStore, jamText string, w http.ResponseWriter)
         }
         fmt.Fprint(w, response)
     }
+    w.Header().Set("Content-Type", "application/json")
 }
 
 func jamPostHandler(w http.ResponseWriter, r *http.Request) {
