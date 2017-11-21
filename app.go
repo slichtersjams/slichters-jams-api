@@ -31,9 +31,9 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
         ctx := appengine.NewContext(r)
         dataStore := DataStore{ctx}
 
-		fakeGifStore := new(FakeGifStore)
+		gifStore := new(GifStore)
 
-        getJamResponse(&dataStore, fakeGifStore, jamText, w)
+        getJamResponse(&dataStore, gifStore, jamText, w)
     } else {
         fmt.Fprint(w, GetRandomJam())
     }
