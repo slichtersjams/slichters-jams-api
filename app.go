@@ -10,6 +10,11 @@ import (
     "google.golang.org/appengine/datastore"
 )
 
+type ResponseJson struct {
+	JamState bool
+	JamText string
+}
+
 var GetRandomJam = getRandomResponse
 
 func init() {
@@ -41,13 +46,15 @@ func getJamResponse(dataStore IDataStore, jamText string, w http.ResponseWriter)
                 http.StatusInternalServerError)
         }
     } else {
-        var response string
+        var response ResponseJson
+        response.JamState = jamState
         if jamState {
-            response = "Jam!"
+            response.JamText = "Jam"
         } else {
-            response = "Not a Jam!"
+            response.JamText = "NotJam"
         }
-        fmt.Fprint(w, response)
+		js, _ := json.Marshal(response)
+		w.Write(js)
     }
     w.Header().Set("Content-Type", "application/json")
 }

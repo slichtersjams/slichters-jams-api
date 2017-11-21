@@ -8,6 +8,7 @@ import (
 	"google.golang.org/appengine/aetest"
 	"google.golang.org/appengine/datastore"
 	"github.com/stretchr/testify/assert"
+	"encoding/json"
 )
 
 func fakeRandomJamGenerator() string {
@@ -52,7 +53,13 @@ func TestGetJamResponse__returns_correct_response_if_it_is_a_jam(t *testing.T) {
 
 	getJamResponse(fakeDataStore, "meat loaves", rr)
 	assert.Equal(t, http.StatusOK, rr.Code)
-	assert.Equal(t, "Jam!", rr.Body.String())
+
+	decoder := json.NewDecoder(rr.Body)
+	var response ResponseJson
+	err := decoder.Decode(&response)
+	assert.Nil(t, err)
+	assert.Equal(t, "Jam", response.JamText)
+	assert.Equal(t, true, response.JamState)
 }
 
 func TestGetJamResponse__returns_correct_response_if_it_is_not_a_jam(t *testing.T) {
@@ -63,8 +70,13 @@ func TestGetJamResponse__returns_correct_response_if_it_is_not_a_jam(t *testing.
 	rr := httptest.NewRecorder()
 
 	getJamResponse(fakeDataStore, "meat loaves", rr)
-	assert.Equal(t, http.StatusOK, rr.Code)
-	assert.Equal(t, "Not a Jam!", rr.Body.String())
+
+	decoder := json.NewDecoder(rr.Body)
+	var response ResponseJson
+	err := decoder.Decode(&response)
+	assert.Nil(t, err)
+	assert.Equal(t, "NotJam", response.JamText)
+	assert.Equal(t, false, response.JamState)
 }
 
 func TestGetJamResponse__returns_bad_request_if_query_not_in_data_store(t *testing.T) {
