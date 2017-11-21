@@ -47,11 +47,13 @@ func getJamResponse(dataStore IDataStore, jamText string, w http.ResponseWriter)
                 http.StatusInternalServerError)
         }
     } else {
-        response := ResponseJson{JamGif: "https://media0.giphy.com/media/3otPovEi2MtN9pEJuo/giphy.gif", JamState: jamState}
+        response := ResponseJson{JamState: jamState}
         if jamState {
             response.JamText = "Jam"
+            response.JamGif = "https://media.giphy.com/media/l2QE6SbWP5RQKVVAc/giphy.gif"
         } else {
             response.JamText = "NotJam"
+            response.JamGif = "https://media.giphy.com/media/l2QEe1z9it3K4OeiY/giphy.gif"
         }
 		js, _ := json.Marshal(response)
 		w.Write(js)
