@@ -52,7 +52,11 @@ func getJamResponse(dataStore IDataStore, gifStore IGifStore, jamText string, w 
         response := ResponseJson{JamState: jamState}
         if jamState {
             response.JamText = "Jam"
-            response.JamGif = gifStore.GetJamGif()
+            if jamText == "velour tracksuit" {
+                response.JamGif = gifStore.GetVelourJamGif()
+            } else {
+                response.JamGif = gifStore.GetJamGif()
+            }
         } else {
             response.JamText = "NotJam"
             response.JamGif = gifStore.GetNotJamGif()

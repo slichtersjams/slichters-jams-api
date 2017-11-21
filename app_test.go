@@ -104,6 +104,25 @@ func TestGetJamResponse__returns_not_jam_gif_link(t *testing.T) {
 	assert.Equal(t, fakeGifStore.NotJamGif, response.JamGif)
 }
 
+func TestGetJamResponse__returns_velour_gif_link_if_given_velour_text(t *testing.T) {
+	storedJam := Jam{"velour tracksuit", true}
+	fakeDataStore := new(FakeDataStore)
+	fakeDataStore.StoredJam = storedJam
+
+	fakeGifStore := new(FakeGifStore)
+	fakeGifStore.VelourJamGif = "velour gif"
+
+	rr := httptest.NewRecorder()
+
+	getJamResponse(fakeDataStore, fakeGifStore,"velour tracksuit", rr)
+
+	decoder := json.NewDecoder(rr.Body)
+	var response ResponseJson
+	err := decoder.Decode(&response)
+	assert.Nil(t, err)
+	assert.Equal(t, fakeGifStore.VelourJamGif, response.JamGif)
+}
+
 func TestGetJamResponse__returns_jam_gif_link(t *testing.T) {
 	storedJam := Jam{"meat loaves", true}
 	fakeDataStore := new(FakeDataStore)
