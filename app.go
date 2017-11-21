@@ -31,13 +31,15 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
         ctx := appengine.NewContext(r)
         dataStore := DataStore{ctx}
 
-        getJamResponse(&dataStore, jamText, w)
+		fakeGifStore := new(FakeGifStore)
+
+        getJamResponse(&dataStore, fakeGifStore, jamText, w)
     } else {
         fmt.Fprint(w, GetRandomJam())
     }
 }
 
-func getJamResponse(dataStore IDataStore, jamText string, w http.ResponseWriter) {
+func getJamResponse(dataStore IDataStore, gifStore IGifStore, jamText string, w http.ResponseWriter) {
     jamState, err := GetJamState(dataStore, jamText)
     if err != nil {
         if err == datastore.ErrNoSuchEntity {
@@ -50,10 +52,10 @@ func getJamResponse(dataStore IDataStore, jamText string, w http.ResponseWriter)
         response := ResponseJson{JamState: jamState}
         if jamState {
             response.JamText = "Jam"
-            response.JamGif = "https://media.giphy.com/media/l2QE6SbWP5RQKVVAc/giphy.gif"
+            response.JamGif = gifStore.GetJamGif()
         } else {
             response.JamText = "NotJam"
-            response.JamGif = "https://media.giphy.com/media/l2QEe1z9it3K4OeiY/giphy.gif"
+            response.JamGif = gifStore.GetNotJamGif()
         }
 		js, _ := json.Marshal(response)
 		w.Write(js)

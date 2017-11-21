@@ -37,9 +37,11 @@ func TestGetJamResponse__puts_json_content_type_header(t *testing.T) {
 	fakeDataStore := new(FakeDataStore)
 	fakeDataStore.StoredJam = storedJam
 
+	fakeGifStore := new(FakeGifStore)
+
 	rr := httptest.NewRecorder()
 
-	getJamResponse(fakeDataStore, "meat loaves", rr)
+	getJamResponse(fakeDataStore, fakeGifStore, "meat loaves", rr)
 
 	assert.Equal(t, "application/json", rr.Header().Get("Content-Type"))
 }
@@ -49,9 +51,11 @@ func TestGetJamResponse__returns_correct_response_if_it_is_a_jam(t *testing.T) {
 	fakeDataStore := new(FakeDataStore)
 	fakeDataStore.StoredJam = storedJam
 
+	fakeGifStore := new(FakeGifStore)
+
 	rr := httptest.NewRecorder()
 
-	getJamResponse(fakeDataStore, "meat loaves", rr)
+	getJamResponse(fakeDataStore, fakeGifStore,"meat loaves", rr)
 	assert.Equal(t, http.StatusOK, rr.Code)
 
 	decoder := json.NewDecoder(rr.Body)
@@ -67,9 +71,11 @@ func TestGetJamResponse__returns_correct_response_if_it_is_not_a_jam(t *testing.
 	fakeDataStore := new(FakeDataStore)
 	fakeDataStore.StoredJam = storedJam
 
+	fakeGifStore := new(FakeGifStore)
+
 	rr := httptest.NewRecorder()
 
-	getJamResponse(fakeDataStore, "meat loaves", rr)
+	getJamResponse(fakeDataStore, fakeGifStore,"meat loaves", rr)
 
 	decoder := json.NewDecoder(rr.Body)
 	var response ResponseJson
@@ -84,15 +90,18 @@ func TestGetJamResponse__returns_not_jam_gif_link(t *testing.T) {
 	fakeDataStore := new(FakeDataStore)
 	fakeDataStore.StoredJam = storedJam
 
+	fakeGifStore := new(FakeGifStore)
+	fakeGifStore.NotJamGif = "not a jam gif"
+
 	rr := httptest.NewRecorder()
 
-	getJamResponse(fakeDataStore, "meat loaves", rr)
+	getJamResponse(fakeDataStore, fakeGifStore,"meat loaves", rr)
 
 	decoder := json.NewDecoder(rr.Body)
 	var response ResponseJson
 	err := decoder.Decode(&response)
 	assert.Nil(t, err)
-	assert.Equal(t, "https://media.giphy.com/media/l2QEe1z9it3K4OeiY/giphy.gif", response.JamGif)
+	assert.Equal(t, fakeGifStore.NotJamGif, response.JamGif)
 }
 
 func TestGetJamResponse__returns_jam_gif_link(t *testing.T) {
@@ -100,23 +109,28 @@ func TestGetJamResponse__returns_jam_gif_link(t *testing.T) {
 	fakeDataStore := new(FakeDataStore)
 	fakeDataStore.StoredJam = storedJam
 
+	fakeGifStore := new(FakeGifStore)
+	fakeGifStore.JamGif = "some jam gif"
+
 	rr := httptest.NewRecorder()
 
-	getJamResponse(fakeDataStore, "meat loaves", rr)
+	getJamResponse(fakeDataStore, fakeGifStore,"meat loaves", rr)
 
 	decoder := json.NewDecoder(rr.Body)
 	var response ResponseJson
 	err := decoder.Decode(&response)
 	assert.Nil(t, err)
-	assert.Equal(t, "https://media.giphy.com/media/l2QE6SbWP5RQKVVAc/giphy.gif", response.JamGif)
+	assert.Equal(t, fakeGifStore.JamGif, response.JamGif)
 }
 
 func TestGetJamResponse__returns_bad_request_if_query_not_in_data_store(t *testing.T) {
 	fakeDataStore := new(FakeDataStore)
 
+	fakeGifStore := new(FakeGifStore)
+
 	rr := httptest.NewRecorder()
 
-	getJamResponse(fakeDataStore, "meat loaves", rr)
+	getJamResponse(fakeDataStore, fakeGifStore,"meat loaves", rr)
 	assert.Equal(t, http.StatusBadRequest, rr.Code)
 }
 
@@ -124,9 +138,11 @@ func TestGetJamResponse__returns_internal_error_if_datastore_has_errors(t *testi
 	fakeDataStore := new(FakeDataStore)
 	fakeDataStore.Error = datastore.ErrInvalidKey
 
+	fakeGifStore := new(FakeGifStore)
+
 	rr := httptest.NewRecorder()
 
-	getJamResponse(fakeDataStore, "meat loaves", rr)
+	getJamResponse(fakeDataStore, fakeGifStore, "meat loaves", rr)
 	assert.Equal(t, http.StatusInternalServerError, rr.Code)
 	assert.Equal(t, "Internal Server Error : datastore: invalid key\n", rr.Body.String())
 }
