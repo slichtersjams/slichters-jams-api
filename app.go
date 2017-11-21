@@ -10,6 +10,12 @@ import (
     "google.golang.org/appengine/datastore"
 )
 
+type ResponseJson struct {
+	JamState bool
+	JamText string
+	JamGif string
+}
+
 var GetRandomJam = getRandomResponse
 
 func init() {
@@ -25,13 +31,15 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
         ctx := appengine.NewContext(r)
         dataStore := DataStore{ctx}
 
-        getJamResponse(&dataStore, jamText, w)
+		gifStore := new(GifStore)
+
+        getJamResponse(&dataStore, gifStore, jamText, w)
     } else {
         fmt.Fprint(w, GetRandomJam())
     }
 }
 
-func getJamResponse(dataStore IDataStore, jamText string, w http.ResponseWriter) {
+func getJamResponse(dataStore IDataStore, gifStore IGifStore, jamText string, w http.ResponseWriter) {
     jamState, err := GetJamState(dataStore, jamText)
     if err != nil {
         if err == datastore.ErrNoSuchEntity {
@@ -41,14 +49,22 @@ func getJamResponse(dataStore IDataStore, jamText string, w http.ResponseWriter)
                 http.StatusInternalServerError)
         }
     } else {
-        var response string
+        response := ResponseJson{JamState: jamState}
         if jamState {
-            response = "Jam!"
+            response.JamText = "Jam"
+            if jamText == "velour tracksuit" {
+                response.JamGif = gifStore.GetVelourJamGif()
+            } else {
+                response.JamGif = gifStore.GetJamGif()
+            }
         } else {
-            response = "Not a Jam!"
+            response.JamText = "NotJam"
+            response.JamGif = gifStore.GetNotJamGif()
         }
-        fmt.Fprint(w, response)
+		js, _ := json.Marshal(response)
+		w.Write(js)
     }
+    w.Header().Set("Content-Type", "application/json")
 }
 
 func jamPostHandler(w http.ResponseWriter, r *http.Request) {
