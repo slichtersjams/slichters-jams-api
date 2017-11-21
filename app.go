@@ -13,6 +13,7 @@ import (
 type ResponseJson struct {
 	JamState bool
 	JamText string
+	JamGif string
 }
 
 var GetRandomJam = getRandomResponse
@@ -46,7 +47,7 @@ func getJamResponse(dataStore IDataStore, jamText string, w http.ResponseWriter)
                 http.StatusInternalServerError)
         }
     } else {
-        var response ResponseJson
+        response := ResponseJson{JamGif: "https://media0.giphy.com/media/3otPovEi2MtN9pEJuo/giphy.gif"}
         response.JamState = jamState
         if jamState {
             response.JamText = "Jam"
