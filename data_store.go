@@ -10,7 +10,17 @@ type DataStore struct {
 }
 
 func (d *DataStore)Put(jam Jam) error {
-	key := datastore.NewIncompleteKey(d.Context, "Jam", nil)
+	query := datastore.NewQuery("Jam").Filter("JamText =", jam.JamText)
+
+	var jams []Jam
+	keys, _ :=query.GetAll(d.Context, &jams)
+
+	var key *datastore.Key
+	if len(keys) > 0 {
+		key = keys[0]
+	} else {
+		key = datastore.NewIncompleteKey(d.Context, "Jam", nil)
+	}
 	_, err := datastore.Put(d.Context, key, &jam)
 
 	return err

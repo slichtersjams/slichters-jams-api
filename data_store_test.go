@@ -35,6 +35,38 @@ func TestDataStore_Put(t *testing.T) {
 	assert.NotNil(t, jams)
 }
 
+func TestDataStore_PutUpdatesStateIfAlreadyInStore(t *testing.T) {
+	inst, err := aetest.NewInstance(
+		&aetest.Options{StronglyConsistentDatastore: true})
+
+	assert.Nil(t, err)
+	defer inst.Close()
+
+	req, err := inst.NewRequest("POST", "/", nil)
+	assert.Nil(t, err)
+
+	ctx := appengine.NewContext(req)
+
+	expectedJam := Jam{"some sweet jam text", true}
+	ds := DataStore{ctx}
+
+	key := datastore.NewIncompleteKey(ctx, "Jam", nil)
+	_, err = datastore.Put(ctx, key, &expectedJam)
+	assert.Nil(t, err)
+
+	jam := Jam{"some sweet jam text", false}
+
+	ds.Put(jam)
+
+	query := datastore.NewQuery("Jam").Filter("JamText =", jam.JamText)
+
+	var jams []Jam
+	_, err = query.GetAll(ctx, &jams)
+	assert.Nil(t, err)
+
+	assert.Len(t, jams, 1)
+}
+
 func TestDataStore_Get(t *testing.T) {
 	inst, err := aetest.NewInstance(
 		&aetest.Options{StronglyConsistentDatastore: true})
