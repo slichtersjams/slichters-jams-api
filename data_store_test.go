@@ -65,6 +65,7 @@ func TestDataStore_PutUpdatesStateIfAlreadyInStore(t *testing.T) {
 	assert.Nil(t, err)
 
 	assert.Len(t, jams, 1)
+	assert.Equal(t, jams[0].State, false)
 }
 
 func TestDataStore_Get(t *testing.T) {
