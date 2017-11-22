@@ -33,9 +33,9 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
 
 		gifStore := new(GifStore)
 
-		fakeUnknownJamStore := new(FakeUnknownJamStore)
+		unknownJamStore := UnknownJamStore{ctx}
 
-		getJamResponse(&dataStore, gifStore, fakeUnknownJamStore, jamText, w)
+		getJamResponse(&dataStore, gifStore, &unknownJamStore, jamText, w)
 	} else {
 		fmt.Fprint(w, GetRandomJam())
 	}
