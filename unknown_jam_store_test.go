@@ -33,3 +33,19 @@ func TestUnknownJamStore_StoreJam(t *testing.T) {
 
 	assert.NotNil(t, unknownJams)
 }
+
+func TestFakeUnknownJamStore_JamInStore__returns_false_if_not_in_store(t *testing.T) {
+	inst, err := aetest.NewInstance(
+		&aetest.Options{StronglyConsistentDatastore: true})
+
+	assert.Nil(t, err)
+	defer inst.Close()
+
+	req, err := inst.NewRequest("GET", "/", nil)
+	assert.Nil(t, err)
+
+	ctx := appengine.NewContext(req)
+	unknownJamStore := UnknownJamStore{ctx}
+
+	assert.False(t, unknownJamStore.JamInStore("not in store"))
+}
