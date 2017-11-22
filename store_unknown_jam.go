@@ -1,5 +1,7 @@
 package app
 
+import "strings"
+
 func storeUnknownJam(unknownJamStore IUnknownJamStore, jamText string) {
-	unknownJamStore.StoreJam(jamText)
+	unknownJamStore.StoreJam(strings.ToLower(jamText))
 }
