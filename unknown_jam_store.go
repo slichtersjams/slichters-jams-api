@@ -19,5 +19,9 @@ func (store *UnknownJamStore)StoreJam(jamText string)  {
 }
 
 func (store *UnknownJamStore)JamInStore(jamText string) bool  {
-	return false
+	query := datastore.NewQuery("UnknownJam").Filter("JamText =", jamText)
+
+	var unknownJams []UnknownJam
+	query.GetAll(store.Context, &unknownJams)
+	return len(unknownJams) > 0
 }
