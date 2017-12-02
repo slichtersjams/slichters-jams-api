@@ -5,6 +5,7 @@ import "google.golang.org/appengine/datastore"
 type FakeUnknownJamStore struct {
 	JamText string
 	StoreCount int
+	ClearCount int
 }
 
 func (fake *FakeUnknownJamStore)StoreJam(jamText string) {
@@ -23,4 +24,5 @@ func (fake *FakeUnknownJamStore)ClearJam(jamText string) {
 	if jamText == fake.JamText {
 		fake.JamText = ""
 	}
+	fake.ClearCount++
 }
