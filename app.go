@@ -75,11 +75,12 @@ func jamPostHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := appengine.NewContext(r)
 
 	dataStore := DataStore{ctx}
+	fakeUnknownJamStore := new(FakeUnknownJamStore)
 
-	postJam(r, w, &dataStore)
+	postJam(r, w, &dataStore, fakeUnknownJamStore)
 }
 
-func postJam(r *http.Request, w http.ResponseWriter, dataStore IDataStore) {
+func postJam(r *http.Request, w http.ResponseWriter, dataStore IDataStore, unknownJamStore IUnknownJamStore) {
 	if r.Body == nil {
 		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 		return
@@ -97,6 +98,8 @@ func postJam(r *http.Request, w http.ResponseWriter, dataStore IDataStore) {
 	}
 	if err = StoreJam(dataStore, jam.JamText, jam.State); err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+	} else {
+		clearUnknownJam(unknownJamStore, jam.JamText)
 	}
 }
 
