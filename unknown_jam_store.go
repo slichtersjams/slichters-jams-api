@@ -30,5 +30,5 @@ func (store *UnknownJamStore)JamInStore(jamText string) *datastore.Key  {
 }
 
 func (store *UnknownJamStore)ClearJam(key *datastore.Key) {
-
+	datastore.Delete(store.Context, key)
 }
