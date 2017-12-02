@@ -75,9 +75,9 @@ func jamPostHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := appengine.NewContext(r)
 
 	dataStore := DataStore{ctx}
-	fakeUnknownJamStore := new(FakeUnknownJamStore)
+	unknownJamStore := UnknownJamStore{ctx}
 
-	postJam(r, w, &dataStore, fakeUnknownJamStore)
+	postJam(r, w, &dataStore, &unknownJamStore)
 }
 
 func postJam(r *http.Request, w http.ResponseWriter, dataStore IDataStore, unknownJamStore IUnknownJamStore) {
