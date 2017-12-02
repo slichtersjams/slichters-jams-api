@@ -8,3 +8,8 @@ func storeUnknownJam(unknownJamStore IUnknownJamStore, jamText string) {
 		unknownJamStore.StoreJam(lowerJamText)
 	}
 }
+
+func clearUnknownJam(unknownJamStore IUnknownJamStore, jamText string) {
+	lowerJamText := strings.ToLower(jamText)
+	unknownJamStore.ClearJam(lowerJamText)
+}

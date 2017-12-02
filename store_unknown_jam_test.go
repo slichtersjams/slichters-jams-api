@@ -34,3 +34,14 @@ func TestStoreUnknownJam__puts_jam_in_unknown_store_if_not_already_there(t *test
 
 	assert.Equal(t, 0, fakeUnknownStore.StoreCount)
 }
+
+func TestStoreUnknownJam__ClearJam__removes_jam_from_unknown_jam_store(t *testing.T) {
+	testText := "SoMe JaM tExT"
+
+	fakeUnknownStore := new(FakeUnknownJamStore)
+	fakeUnknownStore.JamText = strings.ToLower(testText)
+
+	clearUnknownJam(fakeUnknownStore, testText)
+
+	assert.Empty(t, fakeUnknownStore.JamText)
+}
