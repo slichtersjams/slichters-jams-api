@@ -29,6 +29,6 @@ func (store *UnknownJamStore)JamInStore(jamText string) *datastore.Key  {
 	return nil
 }
 
-func (store *UnknownJamStore)ClearJam(jamText string) {
+func (store *UnknownJamStore)ClearJam(key *datastore.Key) {
 
 }

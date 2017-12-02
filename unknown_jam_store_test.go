@@ -34,7 +34,7 @@ func TestUnknownJamStore_StoreJam(t *testing.T) {
 	assert.NotNil(t, unknownJams)
 }
 
-func TestFakeUnknownJamStore_JamInStore__returns_nil_if_not_in_store(t *testing.T) {
+func TestUnknownJamStore_JamInStore__returns_nil_if_not_in_store(t *testing.T) {
 	inst, err := aetest.NewInstance(
 		&aetest.Options{StronglyConsistentDatastore: true})
 
@@ -50,7 +50,7 @@ func TestFakeUnknownJamStore_JamInStore__returns_nil_if_not_in_store(t *testing.
 	assert.Nil(t, unknownJamStore.JamInStore("not in store"))
 }
 
-func TestFakeUnknownJamStore_JamInStore__returns_true_if_in_store(t *testing.T) {
+func TestUnknownJamStore_JamInStore__returns_key_if_in_store(t *testing.T) {
 	inst, err := aetest.NewInstance(
 		&aetest.Options{StronglyConsistentDatastore: true})
 

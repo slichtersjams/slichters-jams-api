@@ -20,9 +20,7 @@ func (fake *FakeUnknownJamStore)JamInStore(jamText string) *datastore.Key {
 	return nil
 }
 
-func (fake *FakeUnknownJamStore)ClearJam(jamText string) {
-	if jamText == fake.JamText {
-		fake.JamText = ""
-	}
+func (fake *FakeUnknownJamStore)ClearJam(key *datastore.Key) {
+	fake.JamText = ""
 	fake.ClearCount++
 }

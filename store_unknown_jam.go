@@ -11,7 +11,7 @@ func storeUnknownJam(unknownJamStore IUnknownJamStore, jamText string) {
 
 func clearUnknownJam(unknownJamStore IUnknownJamStore, jamText string) {
 	lowerJamText := strings.ToLower(jamText)
-	if unknownJamStore.JamInStore(lowerJamText) != nil {
-		unknownJamStore.ClearJam(lowerJamText)
+	if key := unknownJamStore.JamInStore(lowerJamText); key != nil {
+		unknownJamStore.ClearJam(key)
 	}
 }
