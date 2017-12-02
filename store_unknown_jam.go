@@ -4,7 +4,7 @@ import "strings"
 
 func storeUnknownJam(unknownJamStore IUnknownJamStore, jamText string) {
 	lowerJamText := strings.ToLower(jamText)
-	if !unknownJamStore.JamInStore(lowerJamText) {
+	if unknownJamStore.JamInStore(lowerJamText) == nil {
 		unknownJamStore.StoreJam(lowerJamText)
 	}
 }
