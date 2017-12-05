@@ -32,3 +32,7 @@ func (store *UnknownJamStore)GetJamKey(jamText string) *datastore.Key  {
 func (store *UnknownJamStore)ClearJam(key *datastore.Key) {
 	datastore.Delete(store.Context, key)
 }
+
+func (store *UnknownJamStore)GetAllJams() []string {
+	return nil
+}

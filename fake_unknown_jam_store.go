@@ -6,6 +6,7 @@ type FakeUnknownJamStore struct {
 	JamText string
 	StoreCount int
 	ClearCount int
+	AllJams []string
 }
 
 func (fake *FakeUnknownJamStore)StoreJam(jamText string) {
@@ -23,4 +24,8 @@ func (fake *FakeUnknownJamStore)GetJamKey(jamText string) *datastore.Key {
 func (fake *FakeUnknownJamStore)ClearJam(key *datastore.Key) {
 	fake.JamText = ""
 	fake.ClearCount++
+}
+
+func (fake *FakeUnknownJamStore)GetAllJams() []string {
+	return fake.AllJams
 }
