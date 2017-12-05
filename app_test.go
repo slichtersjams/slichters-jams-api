@@ -196,8 +196,9 @@ func TestPostJam__returns_bad_request_with_no_body(t *testing.T) {
 	rr := httptest.NewRecorder()
 
 	fakeDataStore := new(FakeDataStore)
+	fakeUnknownJamStore := new(FakeUnknownJamStore)
 
-	postJam(req, rr, fakeDataStore)
+	postJam(req, rr, fakeDataStore, fakeUnknownJamStore)
 
 	assert.Equal(t, http.StatusBadRequest, rr.Code)
 }
@@ -210,8 +211,9 @@ func TestPostJam__returns_bad_request_with_bad_json(t *testing.T) {
 	rr := httptest.NewRecorder()
 
 	fakeDataStore := new(FakeDataStore)
+	fakeUnknownJamStore := new(FakeUnknownJamStore)
 
-	postJam(req, rr, fakeDataStore)
+	postJam(req, rr, fakeDataStore, fakeUnknownJamStore)
 
 	assert.Equal(t, http.StatusBadRequest, rr.Code)
 }
@@ -224,8 +226,9 @@ func TestPostJam__returns_bad_request_with_incorrect_json(t *testing.T) {
 	rr := httptest.NewRecorder()
 
 	fakeDataStore := new(FakeDataStore)
+	fakeUnknownJamStore := new(FakeUnknownJamStore)
 
-	postJam(req, rr, fakeDataStore)
+	postJam(req, rr, fakeDataStore, fakeUnknownJamStore)
 
 	assert.Equal(t, http.StatusBadRequest, rr.Code)
 }
@@ -239,8 +242,9 @@ func TestPostJam__returns_internal_server_failure_when_datastore_has_errors(t *t
 
 	fakeDataStore := new(FakeDataStore)
 	fakeDataStore.Error = datastore.ErrInvalidKey
+	fakeUnknownJamStore := new(FakeUnknownJamStore)
 
-	postJam(req, rr, fakeDataStore)
+	postJam(req, rr, fakeDataStore, fakeUnknownJamStore)
 
 	assert.Equal(t, http.StatusInternalServerError, rr.Code)
 }
@@ -253,12 +257,48 @@ func TestPostJam__puts_jam_in_store(t *testing.T) {
 	rr := httptest.NewRecorder()
 
 	fakeDataStore := new(FakeDataStore)
+	fakeUnknownJamStore := new(FakeUnknownJamStore)
 
-	postJam(req, rr, fakeDataStore)
+	postJam(req, rr, fakeDataStore, fakeUnknownJamStore)
 
 	expectedJam := Jam{"some jam text", true}
 
 	assert.Equal(t, expectedJam, fakeDataStore.StoredJam)
+}
+
+func TestPostJam__removes_posted_jam_from_unknown_jam_store(t *testing.T) {
+	reader := strings.NewReader(`{"JamText": "some jam text", "State": true}`)
+	req, err := http.NewRequest("POST", "/jams", reader)
+	assert.Nil(t, err)
+
+	rr := httptest.NewRecorder()
+
+	fakeDataStore := new(FakeDataStore)
+	fakeUnknownJamStore := new(FakeUnknownJamStore)
+	fakeUnknownJamStore.JamText = "some jam text"
+
+	postJam(req, rr, fakeDataStore, fakeUnknownJamStore)
+
+	assert.NotZero(t, fakeUnknownJamStore.ClearCount)
+	assert.Empty(t, fakeUnknownJamStore.JamText)
+}
+
+func TestPostJam__does_not_clear_unknown_jam_when_datastore_has_errors(t *testing.T) {
+	reader := strings.NewReader(`{"JamText": "some jam text", "State": true}`)
+	req, err := http.NewRequest("POST", "/jams", reader)
+	assert.Nil(t, err)
+
+	rr := httptest.NewRecorder()
+
+	fakeDataStore := new(FakeDataStore)
+	fakeDataStore.Error = datastore.ErrInvalidKey
+	fakeUnknownJamStore := new(FakeUnknownJamStore)
+	fakeUnknownJamStore.JamText = "some jam text"
+
+	postJam(req, rr, fakeDataStore, fakeUnknownJamStore)
+
+	assert.Zero(t, fakeUnknownJamStore.ClearCount)
+	assert.Equal(t, "some jam text", fakeUnknownJamStore.JamText)
 }
 
 func TestPostHandler__returns_200_with_good_json(t *testing.T) {

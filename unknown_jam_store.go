@@ -18,10 +18,17 @@ func (store *UnknownJamStore)StoreJam(jamText string)  {
 	datastore.Put(store.Context, key, &UnknownJam{JamText: jamText})
 }
 
-func (store *UnknownJamStore)JamInStore(jamText string) bool  {
+func (store *UnknownJamStore)GetJamKey(jamText string) *datastore.Key  {
 	query := datastore.NewQuery("UnknownJam").Filter("JamText =", jamText)
 
 	var unknownJams []UnknownJam
-	query.GetAll(store.Context, &unknownJams)
-	return len(unknownJams) > 0
+	keys, _ := query.GetAll(store.Context, &unknownJams)
+	if len(keys) > 0 {
+		return keys[0]
+	}
+	return nil
+}
+
+func (store *UnknownJamStore)ClearJam(key *datastore.Key) {
+	datastore.Delete(store.Context, key)
 }

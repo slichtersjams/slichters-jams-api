@@ -34,7 +34,7 @@ func TestUnknownJamStore_StoreJam(t *testing.T) {
 	assert.NotNil(t, unknownJams)
 }
 
-func TestFakeUnknownJamStore_JamInStore__returns_false_if_not_in_store(t *testing.T) {
+func TestUnknownJamStore_GetJamKey__returns_nil_if_not_in_store(t *testing.T) {
 	inst, err := aetest.NewInstance(
 		&aetest.Options{StronglyConsistentDatastore: true})
 
@@ -47,10 +47,10 @@ func TestFakeUnknownJamStore_JamInStore__returns_false_if_not_in_store(t *testin
 	ctx := appengine.NewContext(req)
 	unknownJamStore := UnknownJamStore{ctx}
 
-	assert.False(t, unknownJamStore.JamInStore("not in store"))
+	assert.Nil(t, unknownJamStore.GetJamKey("not in store"))
 }
 
-func TestFakeUnknownJamStore_JamInStore__returns_true_if_in_store(t *testing.T) {
+func TestUnknownJamStore_GetJamKey__returns_key_if_in_store(t *testing.T) {
 	inst, err := aetest.NewInstance(
 		&aetest.Options{StronglyConsistentDatastore: true})
 
@@ -69,5 +69,34 @@ func TestFakeUnknownJamStore_JamInStore__returns_true_if_in_store(t *testing.T) 
 
 	unknownJamStore := UnknownJamStore{ctx}
 
-	assert.True(t, unknownJamStore.JamInStore(testText))
+	assert.NotNil(t, unknownJamStore.GetJamKey(testText))
+}
+
+func TestUnknownJamStore_ClearJam__removes_jam_from_store(t *testing.T) {
+	inst, err := aetest.NewInstance(
+		&aetest.Options{StronglyConsistentDatastore: true})
+
+	assert.Nil(t, err)
+	defer inst.Close()
+
+	req, err := inst.NewRequest("GET", "/", nil)
+	assert.Nil(t, err)
+
+	ctx := appengine.NewContext(req)
+
+	testText := "jam in store"
+	key := datastore.NewIncompleteKey(ctx, "UnknownJam", nil)
+	key, err = datastore.Put(ctx, key, &UnknownJam{JamText: testText})
+	assert.Nil(t, err)
+
+	unknownJamStore := UnknownJamStore{ctx}
+	unknownJamStore.ClearJam(key)
+
+	query := datastore.NewQuery("UnknownJam").Filter("JamText =", testText)
+
+	var unknownJams []UnknownJam
+	_, err = query.GetAll(ctx, &unknownJams)
+	assert.Nil(t, err)
+
+	assert.Nil(t, unknownJams)
 }
