@@ -21,6 +21,7 @@ var GetRandomJam = getRandomResponse
 func init() {
 	http.HandleFunc("/", getHandler)
 	http.HandleFunc("/jams", jamPostHandler)
+	http.HandleFunc("/unknownjams", getUnknownJamsHandler)
 	rand.Seed(time.Now().UTC().UnixNano())
 }
 
@@ -108,4 +109,11 @@ func getRandomResponse() string {
 		return "Not a Jam!"
 	}
 	return "Jam!"
+}
+
+func getUnknownJamsHandler(w http.ResponseWriter, r *http.Request) {
+	ctx := appengine.NewContext(r)
+	unknownJamStore := UnknownJamStore{ctx}
+
+	GetUnknownJams(&unknownJamStore, w)
 }

@@ -318,3 +318,23 @@ func TestPostHandler__returns_200_with_good_json(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, rr.Code)
 }
+
+func TestGetUnknownJamHandler__returns_200_and_correct_json(t *testing.T) {
+	inst, err := aetest.NewInstance(
+		&aetest.Options{StronglyConsistentDatastore: true})
+	assert.Nil(t, err)
+	defer inst.Close()
+
+	req, err := inst.NewRequest("GET", "/unknownjams", nil)
+	assert.Nil(t, err)
+
+	rr := httptest.NewRecorder()
+	test_handler := http.HandlerFunc(getUnknownJamsHandler)
+
+	test_handler.ServeHTTP(rr, req)
+
+	decoder := json.NewDecoder(rr.Body)
+	var response UnknownJamJson
+	err = decoder.Decode(&response)
+	assert.Nil(t, err)
+}
