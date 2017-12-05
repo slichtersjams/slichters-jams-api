@@ -134,11 +134,11 @@ func TestUnknownJamStore_GetAllJams__returns_jam_list_from_store(t *testing.T) {
 
 	testJams := [2]string{"jam in store", "another jam in store"}
 	key := datastore.NewIncompleteKey(ctx, "UnknownJam", nil)
-	key, err = datastore.Put(ctx, key, &UnknownJam{JamText: testJams[0]})
+	key, err = datastore.Put(ctx, key, &UnknownJam{JamText: testJams[1]})
 	assert.Nil(t, err)
 
 	key = datastore.NewIncompleteKey(ctx, "UnknownJam", nil)
-	key, err = datastore.Put(ctx, key, &UnknownJam{JamText: testJams[1]})
+	key, err = datastore.Put(ctx, key, &UnknownJam{JamText: testJams[0]})
 	assert.Nil(t, err)
 
 	unknownJamStore := UnknownJamStore{ctx}
