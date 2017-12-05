@@ -4,14 +4,14 @@ import "strings"
 
 func storeUnknownJam(unknownJamStore IUnknownJamStore, jamText string) {
 	lowerJamText := strings.ToLower(jamText)
-	if unknownJamStore.JamInStore(lowerJamText) == nil {
+	if unknownJamStore.GetJamKey(lowerJamText) == nil {
 		unknownJamStore.StoreJam(lowerJamText)
 	}
 }
 
 func clearUnknownJam(unknownJamStore IUnknownJamStore, jamText string) {
 	lowerJamText := strings.ToLower(jamText)
-	if key := unknownJamStore.JamInStore(lowerJamText); key != nil {
+	if key := unknownJamStore.GetJamKey(lowerJamText); key != nil {
 		unknownJamStore.ClearJam(key)
 	}
 }

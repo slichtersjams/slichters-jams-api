@@ -18,7 +18,7 @@ func (store *UnknownJamStore)StoreJam(jamText string)  {
 	datastore.Put(store.Context, key, &UnknownJam{JamText: jamText})
 }
 
-func (store *UnknownJamStore)JamInStore(jamText string) *datastore.Key  {
+func (store *UnknownJamStore)GetJamKey(jamText string) *datastore.Key  {
 	query := datastore.NewQuery("UnknownJam").Filter("JamText =", jamText)
 
 	var unknownJams []UnknownJam

@@ -13,7 +13,7 @@ func (fake *FakeUnknownJamStore)StoreJam(jamText string) {
 	fake.StoreCount++
 }
 
-func (fake *FakeUnknownJamStore)JamInStore(jamText string) *datastore.Key {
+func (fake *FakeUnknownJamStore)GetJamKey(jamText string) *datastore.Key {
 	if jamText == fake.JamText{
 		return new(datastore.Key)
 	}
