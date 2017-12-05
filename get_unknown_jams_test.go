@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"github.com/stretchr/testify/assert"
 	"net/http"
-	"fmt"
 )
 
 func TestGetUnknownJams__has_empty_unknown_jam_list_if_none_in_store(t *testing.T) {
@@ -16,7 +15,6 @@ func TestGetUnknownJams__has_empty_unknown_jam_list_if_none_in_store(t *testing.
 	GetUnknownJams(fakeUnknownJamStore, rr)
 	assert.Equal(t, http.StatusOK, rr.Code)
 
-	fmt.Println(rr.Body)
 	decoder := json.NewDecoder(rr.Body)
 	var response UnknownJamJson
 	err := decoder.Decode(&response)
@@ -34,7 +32,6 @@ func TestGetUnknownJams__has_jam_the_correct_jam_list(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, rr.Code)
 
-	fmt.Println(rr.Body)
 	decoder := json.NewDecoder(rr.Body)
 	var response UnknownJamJson
 	err := decoder.Decode(&response)
