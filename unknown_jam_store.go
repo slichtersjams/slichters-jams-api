@@ -32,3 +32,17 @@ func (store *UnknownJamStore)GetJamKey(jamText string) *datastore.Key  {
 func (store *UnknownJamStore)ClearJam(key *datastore.Key) {
 	datastore.Delete(store.Context, key)
 }
+
+func (store *UnknownJamStore)GetAllJams() []string {
+	query := datastore.NewQuery("UnknownJam")
+	var unknownJams []UnknownJam
+	query.GetAll(store.Context, &unknownJams)
+
+	jamList := make([]string, len(unknownJams))
+
+	for index, jam := range unknownJams {
+		jamList[index] = jam.JamText
+	}
+
+	return jamList
+}
